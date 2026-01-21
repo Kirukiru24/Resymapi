@@ -4,24 +4,25 @@ const jwt = require('jsonwebtoken');
 
 // 1. Create (Register) User
 exports.register = async (req, res) => {
+    // 1. Destructure from body
     const { full_name, email, password, role, division, position } = req.body;
 
     try {
-        // Check if user already exists
+        // 2. Check if user exists
         const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (userExists.rows.length > 0) {
-            return res.status(400).json({ message: "User already exists with this email." });
+            return res.status(400).json({ message: "User already exists." });
         }
 
-        // Hash the password for security
+        // 3. Hash password
         const saltRounds = 10;
         const password_hash = await bcrypt.hash(password, saltRounds);
 
-        // Insert user based on your schema
+        // 4. Insert (Using '|| null' for position to prevent 'undefined' errors)
         const newUser = await pool.query(
             `INSERT INTO users (full_name, email, password_hash, role, division, position) 
              VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, full_name, email, role`,
-            [full_name, email, password_hash, role, division, position]
+            [full_name, email, password_hash, role, division, position || null]
         );
 
         res.status(201).json({
@@ -29,8 +30,11 @@ exports.register = async (req, res) => {
             user: newUser.rows[0]
         });
     } catch (error) {
-        console.error(error.message);
-        res.status(500).send("Server error during registration");
+        // THIS LOG IS CRITICAL: Check Render logs for this output!
+        console.error("REGISTRATION ERROR DETAILS:", error.message); 
+        
+        // Send the actual error message back during testing to see it in the browser
+        res.status(500).json({ error: error.message, detail: "Check backend logs" });
     }
 };
 
