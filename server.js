@@ -7,7 +7,9 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+// Configure CORS
+const allowedOrigins = ['http://localhost:3000', 'https://Resym.onrender.com'];
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 // Import Routes
