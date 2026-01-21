@@ -8,8 +8,25 @@ const app = express();
 // Middleware
 app.use(helmet());
 // Configure CORS
-const allowedOrigins = ['http://localhost:3000', 'https://Resym.onrender.com'];
-app.use(cors({ origin: allowedOrigins }));
+// Configure CORS
+const allowedOrigins = [
+    'http://localhost:3000', 
+    'http://localhost:5173', // Adding Vite default local port
+    'https://resymonline.onrender.com' // Your actual production frontend URL
+];
+
+app.use(cors({ 
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 // Import Routes
