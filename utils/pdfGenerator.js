@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
 
 exports.generateWeeklyReportPDF = async (reportData, tasks) => {
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] });
     const page = await browser.newPage();
-
+    
     // HTML Template based on ALTA Computec Layout [cite: 1, 7, 37, 43, 47]
     const htmlContent = `
     <html>
